@@ -8,7 +8,7 @@ Here's a look at the finished project in action, displaying the real-time temper
 
 | Temperature & Humidity Reading | Heat Index Reading |
 | :----------------------------: | :------------------: |
-| ![Real-time temperature and humidity reading on the LCD](file/uploaded:WhatsApp%20Image%202025-06-29%20at%2012.06.33_fbbe4cf3.jpg) | ![Heat index calculation displayed on the LCD](file/uploaded:WhatsApp%20Image%202025-06-29%20at%2012.06.34_835d7419.jpg) |
+| ![Real-time temperature and humidity reading on the LCD](Temp&HumidDetected.jpg) | ![Heat index calculation displayed on the LCD](HeatIndexDetected.jpg) |
 
 ## Features
 
@@ -59,7 +59,6 @@ If you don't have it already, [download and install the Arduino IDE](https://www
 You can install these libraries directly from the Arduino IDE's Library Manager. Go to **Sketch** > **Include Library** > **Manage Libraries...** and search for the following:
 
 -   `DHT sensor library` by Adafruit
--   `Adafruit Unified Sensor` by Adafruit
 -   `LiquidCrystal_I2C` by Frank de Brabander
 
 ### 3. Upload the Code
@@ -67,62 +66,70 @@ You can install these libraries directly from the Arduino IDE's Library Manager.
 Open the `.ino` sketch file in the Arduino IDE. Make sure you have the correct board (**Arduino Uno**) and port selected under the **Tools** menu. Then, click the upload button.
 
 ```cpp
-// --- Placeholder for your Arduino Code ---
-//
-// #include <Adafruit_Sensor.h>
-// #include <DHT.h>
-// #include <LiquidCrystal_I2C.h>
-//
-// #define DHTPIN 2       // Pin where the DHT data pin is connected
-// #define DHTTYPE DHT11  // Define the type of DHT sensor
-//
-// DHT dht(DHTPIN, DHTTYPE);
-// LiquidCrystal_I2C lcd(0x27, 16, 2); // Set the LCD I2C address, 16 columns and 2 rows
-//
-// void setup() {
-//   lcd.init();
-//   lcd.backlight();
-//   dht.begin();
-// }
-//
-// void loop() {
-//   // Wait a few seconds between measurements.
-//   delay(2000);
-//
-//   float h = dht.readHumidity();
-//   // Read temperature as Celsius (the default)
-//   float t = dht.readTemperature();
-//
-//   // Check if any reads failed and exit early (to try again).
-//   if (isnan(h) || isnan(t)) {
-//     lcd.clear();
-//     lcd.setCursor(0,0);
-//     lcd.print("Failed to read");
-//     lcd.setCursor(0,1);
-//     lcd.print("from DHT sensor!");
-//     return;
-//   }
-//
-//   // Compute heat index in Celsius
-//   float hic = dht.computeHeatIndex(t, h, false);
-//
-//   // Display Temperature and Humidity
-//   lcd.clear();
-//   lcd.setCursor(0, 0);
-//   lcd.print("Humi: " + String(h, 2) + "%");
-//   lcd.setCursor(0, 1);
-//   lcd.print("Temp: " + String(t, 2) + "C");
-//
-//   delay(5000); // Show Temp/Humi for 5 seconds
-//
-//   // Display Heat Index
-//   lcd.clear();
-//   lcd.setCursor(0, 0);
-//   lcd.print("Heat Index");
-//   lcd.setCursor(0, 1);
-//   lcd.print(String(hic, 2) + " C");
-//
-// }
+#include <LiquidCrystal_I2C.h>
+#include <DHT.h>
+
+#define DHTPIN 2
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  lcd.init();
+  lcd.clear();
+  lcd.backlight();
+
+  lcd.setCursor(2, 0);
+  lcd.print("Temperature & Humidity");
+
+  lcd.setCursor(6, 1);
+  lcd.print("Detector");
+  delay(2000);
+  lcd.clear();
+
+  dht.begin();
+}
+
+void loop() {
+  delay(2000);
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+
+  if(isnan(h) || isnan(t)) {
+    lcd.setCursor(0, 0);
+    lcd.print("Failed to read  ");
+    lcd.setCursor(0, 1);
+    lcd.print("from DHT sensor!");
+    return;
+  }
+  
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Humi: ");
+  lcd.print(h);
+  lcd.print("%  ");
+  
+  lcd.setCursor(0, 1);
+  lcd.print("Temp: ");
+  lcd.print(t);
+  lcd.print((char)223);
+  lcd.print("C  ");
+
+  //heat index
+  float hic = dht.computeHeatIndex(t, h, false);
+  delay(3000);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("  Heat Index  ");
+  lcd.setCursor(0, 1);
+  lcd.print("  ");
+  lcd.print(hic);
+  lcd.print((char)223);
+  lcd.print("C    ");
+  
+}
 ```
 
 ## How It Works
